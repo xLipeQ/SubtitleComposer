@@ -1,0 +1,257 @@
+﻿<Window x:Class="String.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:String.Converters" 
+        xmlns:view="clr-namespace:String" 
+        xmlns:model="clr-namespace:String.Model"
+        d:DataContext="{d:DesignInstance Type=view:MainWindow}"
+        mc:Ignorable="d"
+        Title="Subtitle Composer" Height="800" Width="1280"
+        MinHeight="480" MinWidth="640" WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <local:BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <local:TimeSpanToStringConverter x:Key="TimeToStr"/>
+        <local:TextToLengthConverter x:Key="TextToLength"/>
+        <local:TimeSpanToStrBlankConverter x:Key="TimeSpanBlank"/>
+        <local:DurationToIntConverter x:Key="DurationToInt"/>
+        <local:TimeSpanToMsConverter x:Key="TimeToMs"/>
+        <local:DoubleToIntConverter x:Key="VolumeToInt"/>
+        <local:CaptionsToStringConverter x:Key="CaptionToText"/>
+        <local:NullOrEmptyToVisibiltyConverter x:Key="IsNullOrEmpty"/>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.Resources>
+            <FrameworkElement x:Key="ShowElement" 
+                              DataContext="{Binding Show, Converter={StaticResource TimeToStr }}"/>
+        </Grid.Resources>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="0.5*"/>
+            <RowDefinition Height="0.5*"/>
+            <RowDefinition MinHeight="100" Height="Auto" x:Name="Info"/>
+        </Grid.RowDefinitions>
+        <Menu Height="20" VerticalAlignment="Top">
+            <MenuItem Header="File">
+                <MenuItem Header="Open" Name="OpenDialog" Click="OpenDialog_Click"/>
+                <MenuItem Header="Exit" x:Name="Exit" Click="Exit_Click"/>
+            </MenuItem>
+
+            <MenuItem Header="Subtitles">
+                <MenuItem Header="Open" >
+                    <MenuItem Header="SubRip" Name="LoadSubRip"
+                              Click="LoadSubRip_Click"/>
+                </MenuItem>
+                <MenuItem Header="Save" >
+                    <MenuItem Header="SubRip" Name="SaveText"
+                              Click="SaveText_Click"/>
+                </MenuItem>
+                <MenuItem Header="Save translation" 
+                          IsEnabled="{Binding ElementName=Trans, Path=IsChecked}">
+                    <MenuItem Header="SubRip" Name="SaveTrans"
+                              Click="SaveTrans_Click"/>
+                </MenuItem>
+                <MenuItem Header="Translation" x:Name="Trans" IsChecked="False"
+                          Click="Trans_Click"/>
+            </MenuItem>
+
+            <MenuItem Header="Help">
+                <MenuItem Header="About" x:Name="About" Click="About_Click"/>
+            </MenuItem>
+        </Menu>
+
+        <!--Odtwarzacz-->
+        <Grid Margin="0,20,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="50"/>
+            </Grid.RowDefinitions>
+
+            <MediaElement Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center"
+                      LoadedBehavior="Manual" UnloadedBehavior="Stop"
+                      Source="{Binding Video}" Name="VideoPlayer" MediaOpened="VideoPlayer_MediaOpened">
+            </MediaElement>
+
+            <Label Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                   HorizontalContentAlignment="Center" 
+                   Content="{Binding Caption, Mode=OneWay}"
+                   Foreground="White" FontSize="15"
+                   Padding="5" Visibility="{Binding Content, RelativeSource={RelativeSource Self}, 
+                Converter={StaticResource IsNullOrEmpty}}">
+                <Label.Background>
+                    <SolidColorBrush Color="Black" Opacity="0.5"/>
+                </Label.Background>
+            </Label>
+
+            <!--Overlay-->
+            <Rectangle x:Name="VideoMenager" Fill="Transparent" MouseWheel="VideoMenager_MouseWheel"
+                       MouseLeftButtonDown="VideoMenager_MouseLeftButtonDown"/>
+
+
+            <!---Slider and other stuff-->
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="0.05*"/>
+                    <ColumnDefinition Width="0.05*"/>
+                    <ColumnDefinition Width="0.05*"/>
+                    <ColumnDefinition Width="0.1*"/>
+                    <ColumnDefinition Width="0.8*"/>
+                    <ColumnDefinition Width="0.2*"/>
+                </Grid.ColumnDefinitions>
+
+                <Button Style="{StaticResource Navigation Button}" Grid.Column="0"
+                        Margin="3 5" Name="Play" Click="Play_Click">
+                    <Image Source="Images/play.png"/>
+                </Button>
+
+                <Button Style="{StaticResource Navigation Button}" Grid.Column="1"
+                        Margin="0 5" Name="Pause" Click="Pause_Click">
+                    <Image Source="Images/pause.png"/>
+                </Button>
+
+                <Button Style="{StaticResource Navigation Button}" Grid.Column="2"
+                        Margin="3 5" Name="Stop" Click="Stop_Click">
+                    <Image Source="Images/stop.png"/>
+                </Button>
+
+                <Label Grid.Column="3" Content="{Binding Position, Converter={StaticResource TimeSpanBlank}}"
+                   FontSize="15" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+
+                <Grid Grid.Column="4">
+                    <!--Position Slider-->
+                    <Slider  VerticalAlignment="Center" HorizontalAlignment="Center"
+                        Maximum="{Binding VideoDuration, Converter={StaticResource DurationToInt}}"
+                        Value="{Binding Position, Converter={StaticResource TimeToMs}}"
+                        TickFrequency="1" Thumb.DragCompleted="Slider_DragCompleted"
+                        Thumb.DragStarted="Slider_DragStarted"
+                        Style="{StaticResource Horizontal_Slider}" Margin="10 0"
+                        Width="{Binding Path=ActualWidth, 
+                                RelativeSource={RelativeSource Mode=FindAncestor, 
+                                AncestorType={x:Type Grid}}}"/>
+                </Grid>
+
+                <!--Volume Slider-->
+                <Grid Grid.Column="5">
+                    <!--Position Slider-->
+                    <Slider  VerticalAlignment="Center" HorizontalAlignment="Center"
+                        Maximum="100" Style="{StaticResource Horizontal_Slider1}"
+                        Value="{Binding Volume, ElementName=VideoPlayer, Converter={StaticResource VolumeToInt}, Mode=TwoWay}"
+                             Width="175"/>
+                </Grid>
+            </Grid>
+
+        </Grid>
+
+        <Canvas Grid.Row="1" x:Name="SubtitleCanvas" >
+            <DataGrid x:Name="Films" CanUserAddRows="True"
+                  ItemsSource="{Binding FilmsColl}" AutoGenerateColumns="True"
+                  SelectionChanged="Films_SelectionChanged"
+                  MouseRightButtonDown="Films_MouseRightButtonDown"
+                  CanUserSortColumns="False" 
+                  Width="{Binding Path=ActualWidth, 
+                          RelativeSource={RelativeSource Mode=FindAncestor, 
+                          AncestorType={x:Type Canvas}}}"
+                  Height="{Binding Path=ActualHeight, 
+                           RelativeSource={RelativeSource Mode=FindAncestor, 
+                           AncestorType={x:Type Canvas}}}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Show Time" Width="Auto"
+                                    Binding="{Binding Show, ValidatesOnExceptions=True, Converter={StaticResource TimeToStr}, Mode=TwoWay,ValidatesOnDataErrors=True}"
+                                    SortDirection="Descending"/>
+                    <DataGridTextColumn Header="Hide Time" Width="Auto"
+                                    Binding="{Binding Hide, Converter={StaticResource TimeToStr }, Mode=TwoWay, ValidatesOnDataErrors=True,
+                                    ValidatesOnExceptions=True}"/>
+                    <DataGridTextColumn Header="Text" Width="0.5*"
+                                    Binding="{Binding Text, Mode=TwoWay}"/>
+                    <DataGridTextColumn Header="Translation" Width="0.5*" Binding="{Binding Translation, Mode=TwoWay}"
+                                    Visibility="{Binding Source={x:Reference Name=Trans}, Path=IsChecked, Converter={StaticResource BoolToVis}}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Canvas>
+
+        <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch"
+                      Height="5" VerticalAlignment="Top"/>
+
+        <GridSplitter Grid.Row="2" HorizontalAlignment="Stretch"
+                      Height="5" VerticalAlignment="Top"/>
+
+        <Grid DataContext="{Binding ElementName=Films, Path=SelectedItem}" Grid.Row="2" Height="Auto"
+              >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition >
+                    <ColumnDefinition.Style>
+                        <Style TargetType="ColumnDefinition">
+                            <Setter Property="Width" Value="*"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=Trans, Path=IsChecked}" Value="False">
+                                    <Setter Property="Width" Value="0"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ColumnDefinition.Style>
+                </ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <GroupBox>
+                <StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Show" FontSize="15" Width="70"/>
+                        <TextBox Width="130" Height="20" MaxLength="12"
+                                 Text="{Binding Show, Mode=TwoWay, ValidatesOnDataErrors=True,
+                            UpdateSourceTrigger=PropertyChanged, Converter={StaticResource TimeToStr}}" 
+                                 Name="ShowTimeBox"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" >
+                        <Label Content="Hide" FontSize="15" Width="70"/>
+                        <TextBox Width="130" Height="20" MaxLength="12"
+                                 Text="{Binding Hide, Mode=TwoWay, ValidatesOnDataErrors=True,
+                                 UpdateSourceTrigger=PropertyChanged, Converter={StaticResource TimeToStr}}" 
+                                 Name="HideTimeBox"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Duration" FontSize="15" Width="70"/>
+                        <TextBox Width="130" Height="20" Name="DurationBox"
+                                 Text="{Binding Duration, Mode=TwoWay,
+                            UpdateSourceTrigger=PropertyChanged, 
+                            Converter={StaticResource TimeToStr}}"/>
+
+                    </StackPanel>
+                </StackPanel>
+            </GroupBox>
+
+            <GroupBox Header="{Binding Text, Converter={StaticResource TextToLength}, 
+                        ConverterParameter=Text}" 
+                       MaxHeight="{Binding Path=ActualHeight, 
+            RelativeSource={RelativeSource Mode=FindAncestor, 
+            AncestorType={x:Type Grid}}}"
+                      Grid.Column="1">
+                <TextBox Text="{Binding Text, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         HorizontalContentAlignment="Center"
+                         TextWrapping="Wrap" AcceptsReturn="True" 
+                         VerticalScrollBarVisibility="Auto"/>
+            </GroupBox>
+
+            <GroupBox Header="{Binding Translation, Converter={StaticResource TextToLength}, 
+                        ConverterParameter=Transation}" Grid.Column="2"
+                       MaxHeight="{Binding Path=ActualHeight, 
+            RelativeSource={RelativeSource Mode=FindAncestor, 
+            AncestorType={x:Type Grid}}}"
+                      Visibility="{Binding ElementName=Trans, Converter={StaticResource BoolToVis}, Path=IsChecked}">
+                <TextBox Text="{Binding Translation, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         HorizontalContentAlignment="Center"
+                         TextWrapping="Wrap" AcceptsReturn="True" 
+                         VerticalScrollBarVisibility="Auto"
+                         />
+            </GroupBox>
+
+        </Grid>
+
+
+    </Grid>
+</Window>

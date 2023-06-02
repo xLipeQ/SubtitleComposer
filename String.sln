@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33213.308
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "String", "String\String.csproj", "{02EFC70B-A575-4BE5-8CA8-E71BC6B5B61A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SubtitlePlugin", "SubtitlePlugin\SubtitlePlugin.csproj", "{195C602D-D3EC-4546-B17C-C9CD41F01F5B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{02EFC70B-A575-4BE5-8CA8-E71BC6B5B61A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02EFC70B-A575-4BE5-8CA8-E71BC6B5B61A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02EFC70B-A575-4BE5-8CA8-E71BC6B5B61A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02EFC70B-A575-4BE5-8CA8-E71BC6B5B61A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{195C602D-D3EC-4546-B17C-C9CD41F01F5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{195C602D-D3EC-4546-B17C-C9CD41F01F5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{195C602D-D3EC-4546-B17C-C9CD41F01F5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{195C602D-D3EC-4546-B17C-C9CD41F01F5B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9EB902C6-47BA-4FE7-8AA8-14F75998BEA1}
+	EndGlobalSection
+EndGlobal
